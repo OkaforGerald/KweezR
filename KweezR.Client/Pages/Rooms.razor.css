@@ -1,0 +1,24 @@
+﻿table, th, td {
+    border: 1px solid #0f0;
+    border-collapse: collapse;
+    border-top: none;
+    color: #0f0;
+}
+.subhead {
+    text-align: left;
+    color: #0f0;
+}
+table tr:hover {
+    background-color: #0f0;
+}
+table tr:hover td{
+    color: #000;
+}
+table tr:hover th {
+        color: #000;
+}
+.form-control {
+    background-color: #000;
+    color: #0f0;
+    border-color: #0f0;
+}

@@ -1,0 +1,34 @@
+﻿@page "/rooms"
+@using KweezR.Client.HttpRepository
+@inject IRoomService RoomService
+@inject NavigationManager nav
+
+<h3 class="subhead">Rooms</h3>
+<br/>
+<div class="col-lg-8 col-md-6 col-sm-12 p-0">
+	<input type="text" placeholder="Search..." class="form-control" id="search" name="search">
+</div>
+<br/>
+
+<table class = "table">
+	<thead>
+		<tr>
+			<th>Room name</th>
+			<th>Category</th>
+			<th>#Players</th>
+			<th>Access</th>
+		</tr>
+	</thead>
+	@foreach(var room in rooms!)
+	{
+		<tbody>
+			<tr @onclick="() => JoinRoom(room.Name)">
+				<td>@room.Name</td>
+				<td>@room.Category</td>
+				<td>@($"{room.CurrentCapacity}/{room.MaxCapacity}")</td>
+				<td>@room.Access</td>
+			</tr>
+		</tbody>
+	}
+</table>
+
