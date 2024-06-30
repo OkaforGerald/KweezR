@@ -10,25 +10,38 @@
 </div>
 <br/>
 
-<table class = "table">
-	<thead>
-		<tr>
-			<th>Room name</th>
-			<th>Category</th>
-			<th>#Players</th>
-			<th>Access</th>
-		</tr>
-	</thead>
-	@foreach(var room in rooms!)
+
+	@if(rooms is null)
 	{
-		<tbody>
-			<tr @onclick="() => JoinRoom(room.Name)">
-				<td>@room.Name</td>
-				<td>@room.Category</td>
-				<td>@($"{room.CurrentCapacity}/{room.MaxCapacity}")</td>
-				<td>@room.Access</td>
-			</tr>
-		</tbody>
+		<p style="color: #0f0;">Loading...</p>
 	}
-</table>
+	else if (!rooms.Any())
+	{
+		<p>No rooms to display at the moment</p>
+	}
+	else
+	{
+	<table class="table">
+		<thead>
+			<tr>
+				<th>Room name</th>
+				<th>Category</th>
+				<th>#Players</th>
+				<th>Access</th>
+			</tr>
+		</thead>
+		@foreach (var room in rooms!)
+		{
+			<tbody>
+				<tr @onclick="() => JoinRoom(room!.Id)">
+					<td>@room.Name</td>
+					<td>@room.Category</td>
+					<td>@($"{room.CurrentCapacity}/{room.MaxCapacity}")</td>
+					<td>@room.Access</td>
+				</tr>
+			</tbody>
+		}
+	</table>
+	}
+	
 

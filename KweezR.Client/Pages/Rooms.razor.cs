@@ -27,9 +27,9 @@ namespace KweezR.Client.Pages
 			await hubConnection.StartAsync();
         }
 
-        public void JoinRoom(string name)
+        public void JoinRoom(Guid Id)
         {
-            nav.NavigateTo($"game/{name}");
+            nav.NavigateTo($"game/{Id}");
         }
     }
 }

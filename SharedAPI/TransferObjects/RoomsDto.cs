@@ -9,6 +9,8 @@ namespace SharedAPI.TransferObjects
 {
     public class RoomsDto
     {
+        public Guid Id { get; set; }
+
         public string? Name { get; set; }
 
         public string? Access { get; set; }

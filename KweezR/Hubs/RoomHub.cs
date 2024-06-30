@@ -31,7 +31,7 @@ namespace KweezR.Hubs
 
             foreach (var room in rooms)
             {
-                bool IsExists = RoomHandler.RoomCapacities.TryGetValue(room!.Name!, out var currentCapacity);
+                bool IsExists = RoomHandler.RoomCapacities.TryGetValue(room.Id, out var currentCapacity);
 
                 if (IsExists)
                 {

@@ -1,14 +1,17 @@
 .navbar-toggler {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: #00ff00;
+    border: 2px solid #001100;
 }
 
 .top-row {
     height: 3.5rem;
-    background-color: rgba(0,0,0,0.4);
+    background-color: #001100;
+    border-bottom: 2px solid #00ff00;
 }
 
 .navbar-brand {
     font-size: 1.1rem;
+    color: #00ff00;
 }
 
 .bi {
@@ -19,6 +22,7 @@
     margin-right: 0.75rem;
     top: -1px;
     background-size: cover;
+    filter: invert(48%) sepia(79%) saturate(2476%) hue-rotate(86deg) brightness(118%) contrast(119%);
 }
 
 .bi-house-door-fill-nav-menu {
@@ -47,23 +51,26 @@
     }
 
     .nav-item ::deep a {
-        color: #d7d7d7;
-        border-radius: 4px;
+        color: #00ff00;
+        border-radius: 0;
         height: 3rem;
         display: flex;
         align-items: center;
         line-height: 3rem;
+        border: 2px solid transparent;
     }
 
-.nav-item ::deep a.active {
-    background-color: rgba(255,255,255,0.37);
-    color: white;
-}
+        .nav-item ::deep a.active {
+            background-color: #003300;
+            color: #00ff00;
+            border: 2px solid #00ff00; 
+        }
 
-.nav-item ::deep a:hover {
-    background-color: rgba(255,255,255,0.1);
-    color: white;
-}
+        .nav-item ::deep a:hover {
+            background-color: #002200;
+            color: #00ff00; 
+            border: 2px solid #00ff00;
+        }
 
 @media (min-width: 641px) {
     .navbar-toggler {
@@ -71,13 +78,26 @@
     }
 
     .collapse {
-        /* Never collapse the sidebar for wide screens */
         display: block;
     }
-    
+
     .nav-scrollable {
-        /* Allow sidebar to scroll for tall menus */
         height: calc(100vh - 3.5rem);
         overflow-y: auto;
+        scrollbar-width: thin; 
+        scrollbar-color: #00ff00 #001100;
     }
+
+        .nav-scrollable::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .nav-scrollable::-webkit-scrollbar-track {
+            background: #001100;
+        }
+
+        .nav-scrollable::-webkit-scrollbar-thumb {
+            background-color: #00ff00;
+            border: 2px solid #001100;
+        }
 }

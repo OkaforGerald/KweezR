@@ -1,0 +1,38 @@
+﻿body {
+    background-color: #000;
+    color: #0f0;
+    font-family: 'Courier New', monospace;
+}
+
+.container {
+    max-width: 400px;
+    margin-top: 50px;
+    padding: 20px;
+    border: 2px solid #0f0;
+}
+
+.logo {
+    font-size: 36px;
+    text-align: center;
+    color: #0f0;
+    margin-bottom: 20px;
+}
+.label-color {
+    color: #0f0;
+}
+.form-control {
+    background-color: #000;
+    color: #0f0;
+    border-color: #0f0;
+}
+
+.btn-primary {
+    background-color: #0f0;
+    border-color: #0f0;
+    color: #000;
+}
+
+    .btn-primary:hover {
+        background-color: #000;
+        color: #0f0;
+    }

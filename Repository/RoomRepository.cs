@@ -29,5 +29,10 @@ namespace Repository
         {
             return await FindAll(trackChanges).ToListAsync();
         }
-    }
+
+		public async Task<Room> GetRoomById(Guid Id, bool trackChanges)
+		{
+			return await FindByCondition(x => x.Id.Equals(Id), trackChanges).FirstOrDefaultAsync();
+		}
+	}
 }

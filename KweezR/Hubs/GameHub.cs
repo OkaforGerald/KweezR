@@ -17,46 +17,49 @@ namespace KweezR.Hubs
 
         public async override Task OnConnectedAsync()
         {
-            var roomName = Context?.GetHttpContext()?.Request.Query["room"];
-            
-            await Groups.AddToGroupAsync(Context!.ConnectionId, roomName!);
+            var roomId = Guid.Parse(Context?.GetHttpContext()?.Request.Query["room"]!);
 
-            AddToDictionary(roomName!, Context.ConnectionId);
+            var roomName = await manager.Rooms.GetRoomByIdAsync(roomId);
+
+            await Groups.AddToGroupAsync(Context!.ConnectionId, roomName.Name!);
+
+            AddToDictionary(roomName.Id!, Context.ConnectionId);
 
             var rooms = await GetRoomsAndCount();
 
             await roomContext.Clients.All.SendAsync("SendUpdate", rooms);
             
-            await Clients.Group(roomName!).SendMessage($"<SERVER>: WELCOME {Context.ConnectionId}");
+            await Clients.Group(roomName.Name!).SendMessage($"<SERVER>: WELCOME {Context.ConnectionId}");
         }
 
         public async override Task OnDisconnectedAsync(Exception? exception)
         {
-            string roomName = RemoveFromDictionary(Context.ConnectionId);
+            Guid roomId = RemoveFromDictionary(Context.ConnectionId);
 
+			var roomName = await manager.Rooms.GetRoomByIdAsync(roomId);
 			var rooms = await GetRoomsAndCount();
 			await roomContext.Clients.All.SendAsync("SendUpdate", rooms);
 
-			await Clients.Group(roomName).SendMessage($"<SERVER>: {Context.ConnectionId} has left the server");
+			await Clients.Group(roomName.Name!).SendMessage($"<SERVER>: {Context.ConnectionId} has left the server");
         }
 
-        private void AddToDictionary(string room, string Id)
+        private void AddToDictionary(Guid roomId, string Id)
         {
-            bool Exists = RoomHandler.RoomCapacities.TryGetValue(room, out var capacities);
+            bool Exists = RoomHandler.RoomCapacities.TryGetValue(roomId, out var capacities);
 
             if(Exists)
             {
                 capacities?.Add(Id);
-                RoomHandler.RoomCapacities.TryAdd(room, capacities!);
+                RoomHandler.RoomCapacities.TryAdd(roomId, capacities!);
             }
             else
             {
                 capacities = new List<string> { Id };
-                RoomHandler.RoomCapacities.TryAdd(room, capacities);
+                RoomHandler.RoomCapacities.TryAdd(roomId, capacities);
             }
         }
 
-        private string RemoveFromDictionary(string Id)
+        private Guid RemoveFromDictionary(string Id)
         {
             var list = RoomHandler.RoomCapacities.Where(x => x.Value.Contains(Id)).FirstOrDefault();
 
@@ -71,7 +74,7 @@ namespace KweezR.Hubs
 
             foreach(var room in rooms)
             {
-                bool IsExists = RoomHandler.RoomCapacities.TryGetValue(room!.Name!, out var currentCapacity);
+                bool IsExists = RoomHandler.RoomCapacities.TryGetValue(room.Id, out var currentCapacity);
 
                 if(IsExists)
                 {

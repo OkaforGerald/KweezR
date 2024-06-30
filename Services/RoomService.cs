@@ -24,6 +24,7 @@ namespace Services
 
             var response = rooms.Select(x => new RoomsDto
             {
+                Id = x.Id,
                 Name = x.Name,
                 Access = x.Access.ToString(),
                 Category = x.Category.ToString(),
@@ -33,5 +34,22 @@ namespace Services
 
             return response;
         }
-    }
+
+		public async Task<RoomsDto> GetRoomByIdAsync(Guid Id)
+		{
+            var room = await manager.Rooms.GetRoomById(Id, false);
+
+			var response = new RoomsDto
+			{
+				Id = room.Id,
+				Name = room.Name,
+				Access = room.Access.ToString(),
+				Category = room.Category.ToString(),
+				NumberOfQuestions = room.NumberOfQuestions,
+				MaxCapacity = room.MaxCapacity,
+			};
+
+			return response;
+		}
+	}
 }

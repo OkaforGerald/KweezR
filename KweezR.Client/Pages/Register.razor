@@ -1,31 +1,52 @@
 ﻿@page "/register"
 
+@if (ShowRegistrationErrors)
+{
+    <div class="alert alert-danger" role="alert">
+        @foreach (var error in Errors)
+        {
+            <p>@error</p>
+        }
+    </div>
+}
+
 <div class="container">
         <div class="logo">KWEEZR</div>
-        <form>
+        <EditForm Model="_userForRegistration" OnValidSubmit="RegisterUser" >
+        <DataAnnotationsValidator />
             <div class="mb-3">
                 <label for="firstName" class="form-label label-color">First Name</label>
-                <input type="text" class="form-control" id="firstName" required>
+            <InputText type="text" class="form-control" id="firstName" @bind-Value="_userForRegistration.FirstName" />
+            <ValidationMessage For="@(() => _userForRegistration.FirstName)" />
             </div>
             <div class="mb-3">
                 <label for="lastName" class="form-label label-color">Last Name</label>
-                <input type="text" class="form-control" id="lastName" required>
+            <InputText type="text" class="form-control" id="lastName" @bind-Value="_userForRegistration.LastName" />
+            <ValidationMessage For="@(() => _userForRegistration.LastName)" />
             </div>
             <div class="mb-3">
                 <label for="username" class="form-label label-color">Username</label>
-                <input type="text" class="form-control" id="username" required>
+            <InputText type="text" class="form-control" id="username" @bind-Value="_userForRegistration.Username" />
+            <ValidationMessage For="@(() => _userForRegistration.Username)" />
             </div>
             <div class="mb-3">
                 <label for="email" class="form-label label-color">Email</label>
-                <input type="email" class="form-control" id="email" required>
+            <InputText type="email" class="form-control" id="email" @bind-Value="_userForRegistration.Email" />
+            <ValidationMessage For="@(() => _userForRegistration.Email)" />
             </div>
             <div class="mb-3">
                 <label for="password" class="form-label label-color">Password</label>
-                <input type="password" class="form-control" id="password" required>
+            <InputText type="password" class="form-control" id="password" @bind-Value="_userForRegistration.Password" />
+            <ValidationMessage For="@(() => _userForRegistration.Password)" />
             </div>
+        <div class="mb-3">
+            <label for="cpassword" class="form-label label-color">Confirm Password</label>
+            <InputText type="password" class="form-control" id="cpassword" @bind-Value="_userForRegistration.ComparePassword" />
+            <ValidationMessage For="@(() => _userForRegistration.ComparePassword)" />
+        </div>
             <button type="submit" class="btn btn-primary w-100">Register</button>
-        </form>
+        </EditForm>
         <div class="mt-3 text-center">
-            <a href="login.html" class="text-light">Back to Login</a>
+            <a href="login" class="text-light">Back to Login</a>
         </div>
         </div>

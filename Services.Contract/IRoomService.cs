@@ -10,5 +10,8 @@ namespace Services.Contract
     public interface IRoomService
     {
         Task<List<RoomsDto>> GetRoomsAsync();
-    }
+
+        Task<RoomsDto> GetRoomByIdAsync(Guid Id);
+
+	}
 }

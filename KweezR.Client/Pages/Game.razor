@@ -1,29 +1,5 @@
-﻿@page "/game/{name}"
+﻿@page "/game/{Id}"
 @using KweezR.Client.HttpRepository
-@using Microsoft.AspNetCore.SignalR.Client
 @inject IGameService GameService
 @implements IAsyncDisposable
 <h3>Game</h3>
-
-@code {
-	[Parameter]
-	public string? name { get; set; }
-	private HubConnection? hubConnection;
-
-	protected override async Task OnInitializedAsync()
-	{
-		hubConnection = GameService.ConfigureHubConnection(name);
-
-		hubConnection.On<string>("SendMessage", (message) =>
-		{
-			Console.WriteLine(message);
-		});
-
-		await hubConnection.StartAsync();
-	}
-
-	public async ValueTask DisposeAsync()
-	{
-		await hubConnection!.DisposeAsync();
-	}
-}

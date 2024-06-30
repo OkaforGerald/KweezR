@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Repository
 {
-    public class RepositoryContext : IdentityDbContext
+    public class RepositoryContext : IdentityDbContext<User>
     {
         public RepositoryContext(DbContextOptions options) : base(options)
         {

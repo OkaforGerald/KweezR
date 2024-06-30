@@ -4,6 +4,6 @@ namespace KweezR.Hubs
 {
     public static class RoomHandler
     {
-        public static ConcurrentDictionary<string, List<string>> RoomCapacities = new ConcurrentDictionary<string, List<string>>();
+        public static ConcurrentDictionary<Guid, List<string>> RoomCapacities = new ConcurrentDictionary<Guid, List<string>>();
     }
 }

@@ -14,5 +14,8 @@ namespace Contracts
         void DeleteRoom(Room room);
 
         Task<List<Room>> GetAllRooms(bool trackChanges);
-    }
+
+        Task<Room> GetRoomById(Guid Id, bool trackChanges);
+
+	}
 }

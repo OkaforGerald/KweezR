@@ -1,7 +1,13 @@
+using System.Text;
 using Contracts;
+using Entities.Models;
 using KweezR.Hubs;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Repository;
 using Services;
 using Services.Contract;
@@ -16,6 +22,10 @@ builder.Services.AddControllers()
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddSignalR();
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+	options.SuppressModelStateInvalidFilter = true;
+});
 builder.Services.AddCors(opt => opt.AddPolicy("CorsP", builder =>
 {
     builder.AllowAnyHeader();
@@ -24,8 +34,52 @@ builder.Services.AddCors(opt => opt.AddPolicy("CorsP", builder =>
     builder.WithExposedHeaders("X-Pagination");
 }));
 
+builder.Services.AddAutoMapper(typeof(Program));
+
 builder.Services.AddScoped<IRepositoryManager, RepositoryManager>();
 builder.Services.AddScoped<IServiceManager, ServiceManager>();
+builder.Services.AddIdentity<User, IdentityRole>(options =>
+{
+	options.User.RequireUniqueEmail = true;
+	options.Password.RequireUppercase = true;
+	options.Password.RequireNonAlphanumeric = true;
+})
+ .AddDefaultTokenProviders()
+.AddEntityFrameworkStores<RepositoryContext>();
+builder.Services.AddAuthentication();
+builder.Services.AddAuthentication(options =>
+{
+	options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+	options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(options => {
+	options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+	{
+		ValidateIssuer = true,
+		ValidateAudience = true,
+		ValidateIssuerSigningKey = true,
+		ValidateLifetime = true,
+
+		ValidIssuer = builder.Configuration.GetSection("JwtSettings")["Issuer"],
+		ValidAudience = builder.Configuration.GetSection("JwtSettings")["Audience"],
+		IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration.GetSection("JwtSettings")["SigningKey"]!)),
+		ClockSkew = TimeSpan.Zero
+	};
+	options.Events = new JwtBearerEvents
+	{
+		OnMessageReceived = context =>
+		{
+			var accessToken = context.Request.Query["access_token"];
+			var path = context.HttpContext.Request.Path;
+
+			if (!string.IsNullOrWhiteSpace(accessToken) && (path.StartsWithSegments("/rooms") || path.StartsWithSegments("/games")))
+			{
+				context.Token = accessToken;
+			}
+
+			return Task.CompletedTask;
+		}
+	};
+});
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
