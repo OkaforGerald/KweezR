@@ -37,22 +37,21 @@ namespace KweezR.Client.HttpRepository
 			return result!;
 		}
 
-		public async Task<ResponseDto<object>> Login(UserLoginDto userForAuthentication)
+		public async Task<ResponseDto<TokenDto>> Login(UserLoginDto userForAuthentication)
 		{
 			var content = JsonSerializer.Serialize(userForAuthentication);
 			var bodyContent = new StringContent(content, Encoding.UTF8, "application/json");
 
 			var authResult = await _client.PostAsync("auth/login", bodyContent);
 			var authContent = await authResult.Content.ReadAsStringAsync();
-			var result = JsonSerializer.Deserialize<ResponseDto<object>>(authContent, _options);
+			var result = JsonSerializer.Deserialize<ResponseDto<TokenDto>>(authContent, _options);
 
 			if (!authResult.IsSuccessStatusCode)
 				return result!;
-			var token = (TokenDto) result.Data;
-			await _localStorage.SetItemAsync("authToken", token?.accessToken);
-			await _localStorage.SetItemAsync("refreshToken", token?.refreshToken);
-			((AuthStateProvider)_authStateProvider).NotifyUserAuthentication(token?.accessToken!);
-			_client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", token?.accessToken);
+			await _localStorage.SetItemAsync("authToken", result.Data?.accessToken);
+			await _localStorage.SetItemAsync("refreshToken", result.Data?.refreshToken);
+			((AuthStateProvider)_authStateProvider).NotifyUserAuthentication(result.Data?.accessToken!);
+			_client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", result.Data?.accessToken);
 
 			return result;
 		}
@@ -67,12 +66,12 @@ namespace KweezR.Client.HttpRepository
 
 			var refreshResult = await _client.PostAsync("auth/refresh-token", bodyContent);
 			var refreshContent = await refreshResult.Content.ReadAsStringAsync();
-			var result = JsonSerializer.Deserialize<ResponseDto<object>>(refreshContent, _options);
+			var result = JsonSerializer.Deserialize<ResponseDto<TokenDto>>(refreshContent, _options);
 
 			if (!refreshResult.IsSuccessStatusCode)
 				throw new ApplicationException("Something went wrong during the refresh token action");
 
-			var newToken = (TokenDto)result.Data;
+			var newToken = result.Data;
 			await _localStorage.SetItemAsync("authToken", newToken!.accessToken);
 			await _localStorage.SetItemAsync("refreshToken", newToken.refreshToken);
 

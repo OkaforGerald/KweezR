@@ -1,9 +1,12 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.SignalR;
 using Services.Contract;
 using SharedAPI.TransferObjects;
 
 namespace KweezR.Hubs
 {
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class GameHub : Hub<IGameClient>
     {
         private IHubContext<RoomHub> roomContext { get; set; }
@@ -23,24 +26,24 @@ namespace KweezR.Hubs
 
             await Groups.AddToGroupAsync(Context!.ConnectionId, roomName.Name!);
 
-            AddToDictionary(roomName.Id!, Context.ConnectionId);
+            AddToDictionary(roomName.Id!, Context.User?.Identity?.Name);
 
             var rooms = await GetRoomsAndCount();
 
             await roomContext.Clients.All.SendAsync("SendUpdate", rooms);
             
-            await Clients.Group(roomName.Name!).SendMessage($"<SERVER>: WELCOME {Context.ConnectionId}");
+            await Clients.Group(roomName.Name!).SendMessage($"<SERVER>: WELCOME {Context?.User?.Identity?.Name}!");
         }
 
         public async override Task OnDisconnectedAsync(Exception? exception)
         {
-            Guid roomId = RemoveFromDictionary(Context.ConnectionId);
+            Guid roomId = RemoveFromDictionary(Context.User?.Identity?.Name);
 
 			var roomName = await manager.Rooms.GetRoomByIdAsync(roomId);
 			var rooms = await GetRoomsAndCount();
 			await roomContext.Clients.All.SendAsync("SendUpdate", rooms);
 
-			await Clients.Group(roomName.Name!).SendMessage($"<SERVER>: {Context.ConnectionId} has left the server");
+			await Clients.Group(roomName.Name!).SendMessage($"<SERVER>: {Context?.User?.Identity?.Name} has left the room!");
         }
 
         private void AddToDictionary(Guid roomId, string Id)

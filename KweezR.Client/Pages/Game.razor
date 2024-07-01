@@ -2,4 +2,55 @@
 @using KweezR.Client.HttpRepository
 @inject IGameService GameService
 @implements IAsyncDisposable
-<h3>Game</h3>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>8-Bit Game Lobby</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="header">
+        <h1>LOBBY</h1>
+    </div>
+    <div class="container">
+        <div class="room-details">
+            <h2>Room Details</h2>
+            <div class="pixel-box">
+                <p>Name: Pixel Puzzlers</p>
+                <p>Category: General Knowledge</p>
+                <p>Questions: 20</p>
+                <p>Host: PixelMaster99</p>
+                <p>Difficulty: Medium</p>
+                <p>Max Players: 8</p>
+            </div>
+        </div>
+        <div class="waiting-players">
+            <h2>Waiting Players</h2>
+            <ul>
+                <li>PixelMaster99 (Host)</li>
+                <li>RetroGamer42</li>
+                <li>8BitQueen</li>
+                <li>NostalgiaNinja</li>
+                <li>PixelPioneer</li>
+            </ul>
+        </div>
+    </div>
+    <div class="chat-container">
+        <div class="chat-history">
+            <div class="chat-message"><strong>PixelMaster99:</strong> Welcome to the lobby, everyone!</div>
+            <div class="chat-message"><strong>RetroGamer42:</strong> Hey there! Ready to play!</div>
+            <div class="chat-message"><strong>8BitQueen:</strong> This game looks awesome!</div>
+            <div class="chat-message"><strong>NostalgiaNinja:</strong> Can't wait to start!</div>
+            <div class="chat-message"><strong>PixelPioneer:</strong> Good luck to all!</div>
+        </div>
+        <div class="chat-input">
+            <input type="text" placeholder="Type your message...">
+            <button>Send</button>
+        </div>
+    </div>
+</body>
+</html>
+

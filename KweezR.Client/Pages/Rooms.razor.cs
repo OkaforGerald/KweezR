@@ -10,7 +10,7 @@ namespace KweezR.Client.Pages
 
         protected override async Task OnInitializedAsync()
         {
-            hubConnection = RoomService.ConfigureHubConnection();
+            hubConnection = await RoomService.ConfigureHubConnection();
 
             hubConnection.On<List<RoomsDto>>("SendRooms", (rooms) =>
             {

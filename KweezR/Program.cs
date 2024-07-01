@@ -26,11 +26,12 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
 {
 	options.SuppressModelStateInvalidFilter = true;
 });
-builder.Services.AddCors(opt => opt.AddPolicy("CorsP", builder =>
+builder.Services.AddCors(opt => opt.AddDefaultPolicy(builder =>
 {
     builder.AllowAnyHeader();
     builder.AllowAnyMethod();
-    builder.AllowAnyOrigin();
+	builder.WithOrigins("https://localhost:7125", "http://localhost:5033");
+    builder.AllowCredentials();
     builder.WithExposedHeaders("X-Pagination");
 }));
 
@@ -51,6 +52,7 @@ builder.Services.AddAuthentication(options =>
 {
 	options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
 	options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+	options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
 }).AddJwtBearer(options => {
 	options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
 	{
@@ -59,8 +61,8 @@ builder.Services.AddAuthentication(options =>
 		ValidateIssuerSigningKey = true,
 		ValidateLifetime = true,
 
-		ValidIssuer = builder.Configuration.GetSection("JwtSettings")["Issuer"],
-		ValidAudience = builder.Configuration.GetSection("JwtSettings")["Audience"],
+		ValidIssuer = builder.Configuration.GetSection("JwtSettings")["ValidIssuer"],
+		ValidAudience = builder.Configuration.GetSection("JwtSettings")["ValidAudience"],
 		IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration.GetSection("JwtSettings")["SigningKey"]!)),
 		ClockSkew = TimeSpan.Zero
 	};
@@ -73,6 +75,15 @@ builder.Services.AddAuthentication(options =>
 
 			if (!string.IsNullOrWhiteSpace(accessToken) && (path.StartsWithSegments("/rooms") || path.StartsWithSegments("/games")))
 			{
+				context.Token = accessToken;
+			}
+
+			if (string.IsNullOrWhiteSpace(accessToken))
+			{
+				accessToken = context.Request.Headers["Authorization"]
+				.ToString()
+				.Replace("Bearer ", "");
+
 				context.Token = accessToken;
 			}
 
@@ -94,7 +105,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseCors("CorsP");
+app.UseCors();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 

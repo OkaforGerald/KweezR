@@ -7,7 +7,7 @@ namespace KweezR.Client.HttpRepository
 	{
 		Task<ResponseDto<object>> RegisterUser(UserCreationDto userForRegistration);
 
-		Task<ResponseDto<object>> Login(UserLoginDto userForAuthentication);
+		Task<ResponseDto<TokenDto>> Login(UserLoginDto userForAuthentication);
 
 		Task<string> RefreshToken();
 

@@ -4,6 +4,6 @@ namespace KweezR.Client.HttpRepository
 {
     public interface IRoomService
     {
-        HubConnection ConfigureHubConnection();
+        Task<HubConnection> ConfigureHubConnection();
     }
 }

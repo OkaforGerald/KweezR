@@ -53,8 +53,8 @@ namespace Services
 			var claims = await GetClaims();
 			var signingCreds = GetSigningCredentials();
 
-			var token = new JwtSecurityToken(issuer: jwtSettings["Issuer"],
-				audience: jwtSettings["Audience"],
+			var token = new JwtSecurityToken(issuer: jwtSettings["ValidIssuer"],
+				audience: jwtSettings["ValidAudience"],
 				claims: claims,
 				expires: DateTime.Now.AddMinutes(Convert.ToDouble(jwtSettings["expires"])),
 				signingCredentials: signingCreds);
@@ -104,8 +104,8 @@ namespace Services
 				ValidateIssuerSigningKey = true,
 				ValidateLifetime = false,
 
-				ValidIssuer = jwtSettings["Issuer"],
-				ValidAudience = jwtSettings["Audience"],
+				ValidIssuer = jwtSettings["ValidIssuer"],
+				ValidAudience = jwtSettings["ValidAudience"],
 				IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["SigningKey"]!)),
 				ClockSkew = TimeSpan.Zero
 			};

@@ -11,7 +11,7 @@ namespace KweezR.Client.Pages
 
 		protected override async Task OnInitializedAsync()
 		{
-			hubConnection = GameService.ConfigureHubConnection(Guid.Parse(Id));
+			hubConnection = await GameService.ConfigureHubConnection(Guid.Parse(Id));
 
 			hubConnection.On<string>("SendMessage", (message) =>
 			{

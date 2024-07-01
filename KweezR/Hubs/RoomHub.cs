@@ -1,9 +1,12 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.SignalR;
 using Services.Contract;
 using SharedAPI.TransferObjects;
 
 namespace KweezR.Hubs
 {
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class RoomHub : Hub<IRoomClient>
     {
         private readonly IServiceManager manager;

@@ -4,6 +4,6 @@ namespace KweezR.Client.HttpRepository
 {
 	public interface IGameService
 	{
-		HubConnection ConfigureHubConnection(Guid Id);
+		Task<HubConnection> ConfigureHubConnection(Guid Id);
 	}
 }
