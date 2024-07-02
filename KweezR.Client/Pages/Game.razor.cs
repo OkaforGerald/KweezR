@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.SignalR.Client;
+using SharedAPI.TransferObjects;
 
 namespace KweezR.Client.Pages
 {
@@ -7,6 +9,10 @@ namespace KweezR.Client.Pages
 	{
 		[Parameter]
 		public string Id { get; set; }
+		private LobbyDto? Lobby { get; set; }
+		private string? message { get; set; }
+		private HubConnectionState State { get; set; }
+		private List<string>? Messages { get; set; } = new List<string>();
 		private HubConnection? hubConnection;
 
 		protected override async Task OnInitializedAsync()
@@ -15,13 +21,35 @@ namespace KweezR.Client.Pages
 
 			hubConnection.On<string>("SendMessage", (message) =>
 			{
-				Console.WriteLine(message);
+				Messages!.Add(message);
+				StateHasChanged();
+			});
+
+			hubConnection.On<LobbyDto>("SendLobbyDetails", (lobby) =>
+			{
+				Lobby = lobby;
+				StateHasChanged();
 			});
 
 			await hubConnection.StartAsync();
 		}
 
-		public async ValueTask DisposeAsync()
+		public async Task BroadcastMessage()
+		{
+			await hubConnection!.SendAsync("BroadcastMessage", message, Id);
+			message = "";
+		}
+
+        public async Task Enter(KeyboardEventArgs e)
+        {
+			if(e.Code == "Enter" || e.Code == "NumpadEnter")
+			{
+                await hubConnection!.SendAsync("BroadcastMessage", message, Id);
+                message = "";
+            }
+        }
+
+        public async ValueTask DisposeAsync()
 		{
 			await hubConnection!.DisposeAsync();
 		}

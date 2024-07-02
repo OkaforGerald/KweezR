@@ -20,7 +20,7 @@
 .label-color {
     color: #0f0;
 }
-.form-control {
+::deep .form-control {
     background-color: #000;
     color: #0f0;
     border-color: #0f0;

@@ -12,7 +12,7 @@
     margin-bottom: 20px;
 }
 
-.form-control {
+::deep .form-control {
     background-color: #000;
     color: #0f0;
     border-color: #0f0;

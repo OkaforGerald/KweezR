@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using System.Runtime.CompilerServices;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.SignalR;
 using Services.Contract;
 using SharedAPI.TransferObjects;
@@ -31,8 +33,18 @@ namespace KweezR.Hubs
             var rooms = await GetRoomsAndCount();
 
             await roomContext.Clients.All.SendAsync("SendUpdate", rooms);
-            
+
+            var lobbyDeets = GetLobbyInfo(roomName);
+
             await Clients.Group(roomName.Name!).SendMessage($"<SERVER>: WELCOME {Context?.User?.Identity?.Name}!");
+            await Clients.Group(roomName.Name!).SendLobbyDetails(lobbyDeets);
+        }
+
+        public async Task BroadcastMessage(string message, Guid RoomId)
+        {
+            var room = await manager.Rooms.GetRoomByIdAsync(RoomId);
+
+            await Clients.Group(room!.Name!).SendMessage($"<{Context.User?.Identity!.Name}>: {message}");
         }
 
         public async override Task OnDisconnectedAsync(Exception? exception)
@@ -52,12 +64,13 @@ namespace KweezR.Hubs
 
             if(Exists)
             {
-                capacities?.Add(Id);
+                capacities?.AddLast(Id);
                 RoomHandler.RoomCapacities.TryAdd(roomId, capacities!);
             }
             else
             {
-                capacities = new List<string> { Id };
+                capacities = new LinkedList<string>();
+                capacities.AddFirst(Id);
                 RoomHandler.RoomCapacities.TryAdd(roomId, capacities);
             }
         }
@@ -90,6 +103,31 @@ namespace KweezR.Hubs
             }
 
             return rooms;
+        }
+
+        private LobbyDto GetLobbyInfo(RoomsDto room)
+        {
+            bool IsExists = RoomHandler.RoomCapacities.TryGetValue(room.Id, out var currentCapacity);
+
+            var lobby = new LobbyDto
+            {
+                Name = room.Name,
+                Access = room.Access,
+                Category = room.Category,
+                Capacity = room.MaxCapacity,
+                NumberOfQuestions = room.NumberOfQuestions
+            };
+
+            if (IsExists)
+            {
+                lobby.Players = currentCapacity.ToList();
+                return lobby;
+            }
+            else
+            {
+                lobby.Players = Array.Empty<string>().ToList();
+                return lobby;
+            }
         }
     }
 }
