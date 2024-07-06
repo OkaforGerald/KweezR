@@ -55,8 +55,11 @@ namespace KweezR.Hubs
 			var rooms = await GetRoomsAndCount();
 			await roomContext.Clients.All.SendAsync("SendUpdate", rooms);
 
+			var lobbyDeets = GetLobbyInfo(roomName);
+
 			await Clients.Group(roomName.Name!).SendMessage($"<SERVER>: {Context?.User?.Identity?.Name} has left the room!");
-        }
+			await Clients.Group(roomName.Name!).SendLobbyDetails(lobbyDeets);
+		}
 
         private void AddToDictionary(Guid roomId, string Id)
         {

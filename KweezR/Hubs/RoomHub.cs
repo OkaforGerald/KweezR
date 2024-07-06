@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Entities.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
 using Services.Contract;
 using SharedAPI.TransferObjects;
@@ -10,10 +12,12 @@ namespace KweezR.Hubs
     public class RoomHub : Hub<IRoomClient>
     {
         private readonly IServiceManager manager;
+        private readonly UserManager<User> userManager;
 
-        public RoomHub(IServiceManager manager)
+        public RoomHub(IServiceManager manager, UserManager<User> userManager)
         {
             this.manager = manager;
+            this.userManager = userManager;
         }
 
         public async override Task OnConnectedAsync()
@@ -48,5 +52,16 @@ namespace KweezR.Hubs
 
             return rooms;
         }
+
+        public async Task CreateRoom(CreateRoomDto room)
+        {
+            var UserName = Context.User?.Identity?.Name;
+            var user = await userManager.FindByNameAsync(UserName!);
+
+            room.OwnerId = user?.Id;
+            var Id = await manager.Rooms.CreateRoomDto(room);
+
+            await Clients.Caller.SendId(Id);
+        } 
     }
 }

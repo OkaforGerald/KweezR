@@ -12,6 +12,8 @@ namespace Entities.Models
         Private = 200
     }
 
+
+
     public enum QuizCategory
     {
         Random = 100,
@@ -36,6 +38,15 @@ namespace Entities.Models
 
         public int NumberOfQuestions { get; set; }
 
+        public string? Hash { get; set; }
+
+        public string? Salt { get; set; }
+
         public bool IsActive { get; set; }
+
+        public bool IsInSession { get; set; }
+
+        public User? Owner { get; set; }
+        public string? OwnerId { get; set; }
     }
 }

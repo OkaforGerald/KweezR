@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.SignalR.Client;
+﻿using Entities.Models;
+using Microsoft.AspNetCore.SignalR.Client;
 using SharedAPI.TransferObjects;
 
 namespace KweezR.Client.Pages
@@ -7,8 +8,10 @@ namespace KweezR.Client.Pages
     {
         private HubConnection? hubConnection;
         private List<RoomsDto>? rooms;
+		private bool showModal = false;
+		private CreateRoomDto newRoom = new CreateRoomDto();
 
-        protected override async Task OnInitializedAsync()
+		protected override async Task OnInitializedAsync()
         {
             hubConnection = await RoomService.ConfigureHubConnection();
 
@@ -24,6 +27,11 @@ namespace KweezR.Client.Pages
 				StateHasChanged();
 			});
 
+			hubConnection.On<Guid>("SendId", (id) =>
+			{
+				JoinRoom(id);
+			});
+
 			await hubConnection.StartAsync();
         }
 
@@ -31,5 +39,22 @@ namespace KweezR.Client.Pages
         {
             nav.NavigateTo($"game/{Id}");
         }
-    }
+
+		private void OpenModal()
+		{
+			showModal = true;
+		}
+
+		private void CloseModal()
+		{
+			showModal = false;
+			newRoom = new CreateRoomDto();
+		}
+
+		private async Task CreateRoom()
+		{
+			await hubConnection!.SendAsync("CreateRoom", newRoom);
+			CloseModal();
+		}
+	}
 }

@@ -8,5 +8,7 @@ namespace KweezR.Hubs
         Task SendRooms(List<RoomsDto> Rooms);
 
         Task SendUpdate(List<RoomsDto> Rooms);
+
+        Task SendId(Guid Id);
     }
 }

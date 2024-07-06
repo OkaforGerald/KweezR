@@ -1,16 +1,16 @@
 ﻿@page "/rooms"
+@using Entities.Models
 @using KweezR.Client.HttpRepository
 @inject IRoomService RoomService
 @inject NavigationManager nav
 
 <h3 class="subhead">Rooms</h3>
 <br/>
+<button class="create-button" @onclick="OpenModal">+</button>
 <div class="col-lg-8 col-md-6 col-sm-12 p-0">
 	<input type="text" placeholder="Search..." class="form-control" id="search" name="search">
 </div>
 <br/>
-
-
 	@if(rooms is null)
 	{
 		<p style="color: #0f0;">Loading...</p>
@@ -43,5 +43,42 @@
 		}
 	</table>
 	}
-	
 
+<div class="modal-backdrop" id="createRoom" tabindex="-1" role="dialog" aria-labelledby="createRoomModal" style="display:@(showModal ? "block;" : "none;")" aria-hidden="@(showModal ? "block;" : "none;")">
+	<div class="modal-dialog modal-dialog-centered" role="document">
+	<div class="modal-content">
+		<span class="close" @onclick="CloseModal">&times;</span>
+		<h2>Create Room</h2>
+		<br/>
+		<label for="name">Room Name</Label>
+		<input type="text" id = "name" placeholder="Room Name" @bind="newRoom.Name" />
+		<label for="access">Room Access</Label>
+		<select id="access" @bind="newRoom.Access">
+			<option value="">Select Access</option>
+			@foreach (var access in Enum.GetValues(typeof(RoomAccess)))
+                    {
+                        <option value="@access">@access</option>
+                    }
+		</select>
+		<label for="category">Category</Label>
+		<select @bind="newRoom.Category">
+			<option value="">Select Category</option>
+			@foreach (var category in Enum.GetValues(typeof(QuizCategory)))
+                    {
+                        <option value="@category">@category</option>
+                    }
+		</select>
+		<label for="capacity">Capacity</Label>
+		<input type="number" id = "capacity" placeholder="Max Capacity" max="4" @bind="newRoom.MaxCapacity" />
+		<label for="numQuest">Number of Questions</label>
+		<input type="number" placeholder="Number of Questions" max = "20" @bind="newRoom.NumberOfQuestions" />
+		@if (newRoom.Access == RoomAccess.Private)
+		{
+			<label for="password">Password</Label>
+			<input type="password" id = "password" placeholder="Password" autocomplete="off" @bind="newRoom.Password" />
+		}
+		<button @onclick="CreateRoom">Create</button>
+		<button @onclick="CloseModal">Cancel</button>
+	</div>
+	</div>
+</div>

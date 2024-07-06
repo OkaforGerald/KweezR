@@ -13,5 +13,7 @@ namespace Services.Contract
 
         Task<RoomsDto> GetRoomByIdAsync(Guid Id);
 
-	}
+        Task<Guid> CreateRoomDto(CreateRoomDto room);
+
+    }
 }
