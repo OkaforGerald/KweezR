@@ -13,6 +13,7 @@ namespace KweezR.Hubs
     {
         private IHubContext<RoomHub> roomContext { get; set; }
         private readonly IServiceManager manager;
+        HttpClient client = new HttpClient { BaseAddress = new Uri("https://opentdb.com/api.php") };
 
         public GameHub(IHubContext<RoomHub> roomContext, IServiceManager manager)
         {
@@ -38,6 +39,11 @@ namespace KweezR.Hubs
 
             await Clients.Group(roomName.Name!).SendMessage($"<SERVER>: WELCOME {Context?.User?.Identity?.Name}!");
             await Clients.Group(roomName.Name!).SendLobbyDetails(lobbyDeets);
+
+            if(lobbyDeets.Players!.Count() == roomName.MaxCapacity)
+            {
+                await StartGame(roomName.Name!);
+            }
         }
 
         public async Task BroadcastMessage(string message, Guid RoomId)
@@ -68,12 +74,6 @@ namespace KweezR.Hubs
 
             if (Exists)
             {
-
-                if(capacities!.Count() + 1 == room.MaxCapacity)
-                {
-                    await StartGame(room.Name);
-                }
-
                 capacities?.AddLast(Id);
                 RoomHandler.RoomCapacities.TryAdd(roomId, capacities!);
             }
@@ -85,9 +85,17 @@ namespace KweezR.Hubs
             }
         }
 
-        private async Task StartGame(string roomName)
+        private async Task StartGame(Guid roomId)
         {
-            await Clients.Group(roomName).StartGame();
+            var roomName = await manager.Rooms.GetRoomByIdAsync(roomId);
+            await GetQuestions(roomName);
+            await Clients.Group(roomName.Name).StartGame();
+        }
+
+        private async Task GetQuestions(RoomsDto room)
+        {
+            //"https://opentdb.com/api.php?amount=10&category=12&difficulty=easy&type=multiple"
+            //room.NumberOfQuestions
         }
 
         private Guid RemoveFromDictionary(string Id)

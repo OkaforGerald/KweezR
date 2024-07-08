@@ -4,7 +4,14 @@
 @implements IAsyncDisposable
 
 <div class="header">
-    <h1>LOBBY</h1>
+    @if(GameState == GameState.Lobby)
+    {
+        <h1>LOBBY</h1>
+    }
+    else
+    {
+        <h1>GAME</h1>   
+    }
 </div>
 
 @if(Lobby is null)
@@ -52,7 +59,7 @@ else if(GameState == GameState.Lobby)
         {
             <div class="player-box" style="@GetPlayerBoxStyle(i)">
                 <h3>@Lobby.Players[i]</h3>
-                <p>Score: @PlayerScores[Lobby.Players[i]])</p>
+                <p>Score: @PlayerScores[Lobby.Players[i]]</p>
             </div>
         }
     </div>

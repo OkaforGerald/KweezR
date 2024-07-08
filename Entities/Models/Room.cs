@@ -17,13 +17,16 @@ namespace Entities.Models
     public enum QuizCategory
     {
         Random = 100,
-        General = 200,
-        Books = 300,
-        Film = 400,
-        Music = 500,
-        VideoGames = 600,
-        Mathematics = 700,
-        Computers = 800
+        General = 9,
+        Books = 10,
+        Film = 11,
+        Music = 12,
+        VideoGames = 15,
+        Mathematics = 19,
+        Computers = 18,
+        Sports = 21,
+        Geography = 22,
+        Art = 25
     }
 
     public class Room : EntityBase

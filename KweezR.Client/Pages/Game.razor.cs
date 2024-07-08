@@ -1,8 +1,10 @@
 ﻿using System.Diagnostics;
+using System.Timers;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.SignalR.Client;
 using SharedAPI.TransferObjects;
+using Timer = System.Timers.Timer;
 
 namespace KweezR.Client.Pages
 {
@@ -15,9 +17,9 @@ namespace KweezR.Client.Pages
 		private HubConnectionState State { get; set; }
 		private List<string>? Messages { get; set; } = new List<string>();
 		private HubConnection? hubConnection;
-		private GameState GameState { get; set; }
-		private int ElapsedTime { get; set; }
-        Stopwatch sw = new Stopwatch();
+		private GameState GameState { get; set; } = GameState.Lobby;
+		private int ElapsedTime { get; set; } = 10;
+        Timer timer;
         private string CurrentQuestion { get; set; }
         private List<string> CurrentOptions { get; set; } = new List<string>();
         private Dictionary<string, int> PlayerScores { get; set; } = new Dictionary<string, int>();
@@ -35,21 +37,19 @@ namespace KweezR.Client.Pages
 			hubConnection.On<LobbyDto>("SendLobbyDetails", (lobby) =>
 			{
 				Lobby = lobby;
-				foreach(var player in Lobby!.Players!)
-				{
-					PlayerScores.Add(player, 0);
-				}
                 StateHasChanged();
 			});
 
 			hubConnection.On("StartGame", () =>
 			{
 				GameState = GameState.InProgress;
-				StartTimer();
-				StateHasChanged();
+                foreach (var player in Lobby!.Players!)
+                {
+                    PlayerScores.Add(player, 0);
+                }
+                StateHasChanged();
+                StartTimer();
 			});
-
-			GameState = GameState.Lobby;
 
 			await hubConnection.StartAsync();
 		}
@@ -58,7 +58,8 @@ namespace KweezR.Client.Pages
 		{
 			await hubConnection!.SendAsync("BroadcastMessage", message, Id);
 			message = "";
-		}
+            StateHasChanged();
+        }
 
         public async Task Enter(KeyboardEventArgs e)
         {
@@ -67,6 +68,28 @@ namespace KweezR.Client.Pages
                 await hubConnection!.SendAsync("BroadcastMessage", message, Id);
                 message = "";
             }
+        }
+
+        public void StartTimer()
+        {
+            timer = new Timer(1000);
+            timer.Elapsed += CountDownTimer;
+            timer.Enabled = true;
+        }
+
+        public void CountDownTimer(Object source, ElapsedEventArgs e)
+        {
+            if(ElapsedTime > 0)
+            {
+                ElapsedTime--;
+            }
+            else
+            {
+                timer.Enabled = false;
+                ElapsedTime = 10;
+                timer.Dispose();
+            }
+            InvokeAsync(StateHasChanged);
         }
 
         private string GetPlayerBoxStyle(int index)
@@ -81,21 +104,6 @@ namespace KweezR.Client.Pages
             }
             return "flex-basis: 45%;"; // For 4 players
         }
-
-        private void StartTimer()
-		{
-			sw.Start();
-			while(sw.ElapsedMilliseconds <= 10_000)
-			{
-				ElapsedTime = (int) Math.Floor(sw.ElapsedMilliseconds / (double) 1_000);
-				StateHasChanged();
-			}
-		}
-
-		private void StopTimer()
-		{
-			sw.Stop();
-		}
 
         private void SelectAnswer(string option)
         {
