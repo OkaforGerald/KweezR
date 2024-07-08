@@ -11,7 +11,7 @@
 {
     <p style="color: #0f0;">Loading...</p>
 }
-else
+else if(GameState == GameState.Lobby)
 {
     <div class="container">
         <div class="room-details">
@@ -30,12 +30,45 @@ else
             <ul>
                 @foreach(var player in Lobby.Players)
                 {
-                    <li>@player</li>
+                    if (player.Equals(Lobby.Players.First()))
+                    {
+                        <li>@($"{player} (Host)")</li>
+                    }
+                    else
+                    {
+                        <li>@player</li>
+                    }
                 }
             </ul>
         </div>
     </div>
-    <div class="chat-container">
+}else if (GameState == GameState.InProgress)
+{
+    <div class="timer">
+        Time remaining: @ElapsedTime seconds
+    </div>
+    <div class="player-container">
+        @for (int i = 0; i < Lobby.Players.Count; i++)
+        {
+            <div class="player-box" style="@GetPlayerBoxStyle(i)">
+                <h3>@Lobby.Players[i]</h3>
+                <p>Score: @PlayerScores[Lobby.Players[i]])</p>
+            </div>
+        }
+    </div>
+    <div class="question-area">
+        <h2>@CurrentQuestion</h2>
+        <div class="options">
+            @foreach (var option in CurrentOptions)
+            {
+                <div class="option" @onclick="() => SelectAnswer(option)">
+                    @option
+                </div>
+            }
+        </div>
+    </div>
+}
+<div class="chat-container">
         <div class="chat-history">
             @if (!Messages.Any())
             {
@@ -54,6 +87,4 @@ else
             <button @onclick = "BroadcastMessage" >Send</button>
         </div>
     </div>
-
-}
 

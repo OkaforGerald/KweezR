@@ -7,5 +7,7 @@ namespace KweezR.Hubs
         Task SendMessage(string message);
 
         Task SendLobbyDetails(LobbyDto lobby);
+
+        Task StartGame();
     }
 }

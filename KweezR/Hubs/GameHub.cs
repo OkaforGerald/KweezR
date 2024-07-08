@@ -28,7 +28,7 @@ namespace KweezR.Hubs
 
             await Groups.AddToGroupAsync(Context!.ConnectionId, roomName.Name!);
 
-            AddToDictionary(roomName.Id!, Context.User?.Identity?.Name);
+            await AddToDictionary(roomName.Id!, Context.User?.Identity?.Name);
 
             var rooms = await GetRoomsAndCount();
 
@@ -61,12 +61,19 @@ namespace KweezR.Hubs
 			await Clients.Group(roomName.Name!).SendLobbyDetails(lobbyDeets);
 		}
 
-        private void AddToDictionary(Guid roomId, string Id)
+        private async Task AddToDictionary(Guid roomId, string Id)
         {
             bool Exists = RoomHandler.RoomCapacities.TryGetValue(roomId, out var capacities);
+            var room = await manager.Rooms.GetRoomByIdAsync(roomId);
 
-            if(Exists)
+            if (Exists)
             {
+
+                if(capacities!.Count() + 1 == room.MaxCapacity)
+                {
+                    await StartGame(room.Name);
+                }
+
                 capacities?.AddLast(Id);
                 RoomHandler.RoomCapacities.TryAdd(roomId, capacities!);
             }
@@ -76,6 +83,11 @@ namespace KweezR.Hubs
                 capacities.AddFirst(Id);
                 RoomHandler.RoomCapacities.TryAdd(roomId, capacities);
             }
+        }
+
+        private async Task StartGame(string roomName)
+        {
+            await Clients.Group(roomName).StartGame();
         }
 
         private Guid RemoveFromDictionary(string Id)

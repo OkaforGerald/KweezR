@@ -27,7 +27,9 @@ namespace Repository
 
         public async Task<List<Room>> GetAllRooms(bool trackChanges)
         {
-            return await FindAll(trackChanges).ToListAsync();
+            var rooms = await FindAll(trackChanges).ToListAsync();
+
+            return rooms;
         }
 
 		public async Task<Room> GetRoomById(Guid Id, bool trackChanges)
