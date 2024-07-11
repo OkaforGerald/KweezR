@@ -3,6 +3,7 @@ using System.Timers;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.SignalR.Client;
+using Microsoft.VisualBasic;
 using SharedAPI.TransferObjects;
 using Timer = System.Timers.Timer;
 
@@ -18,10 +19,13 @@ namespace KweezR.Client.Pages
 		private List<string>? Messages { get; set; } = new List<string>();
 		private HubConnection? hubConnection;
 		private GameState GameState { get; set; } = GameState.Lobby;
-		private int ElapsedTime { get; set; } = 10;
+        private int QuestionRound { get; set; } = 1;
+        private bool Delay { get; set; }
+		private int ElapsedTime { get; set; } = 5;
         Timer timer;
-        private string CurrentQuestion { get; set; }
-        private List<string> CurrentOptions { get; set; } = new List<string>();
+        private string CurrentQuestion { get; set; } = "What color's your tip?";
+        private List<string> CurrentOptions { get; set; } = new List<string> { "Red", "Brown", "White", "Jigsaw you tweaking"};
+        private QuestionDto? AllQuestions { get; set; }
         private Dictionary<string, int> PlayerScores { get; set; } = new Dictionary<string, int>();
 
         protected override async Task OnInitializedAsync()
@@ -40,14 +44,16 @@ namespace KweezR.Client.Pages
                 StateHasChanged();
 			});
 
-			hubConnection.On("StartGame", () =>
+			hubConnection.On<QuestionDto>("StartGame", (questions) =>
 			{
 				GameState = GameState.InProgress;
+                AllQuestions = questions;
                 foreach (var player in Lobby!.Players!)
                 {
                     PlayerScores.Add(player, 0);
                 }
                 StateHasChanged();
+                Delay = true;
                 StartTimer();
 			});
 
@@ -77,7 +83,14 @@ namespace KweezR.Client.Pages
             timer.Enabled = true;
         }
 
-        public void CountDownTimer(Object source, ElapsedEventArgs e)
+        public void StartAnswerTimer()
+        {
+            timer = new Timer(100);
+            timer.Elapsed += CountDownTimer;
+            timer.Enabled = true;
+        }
+
+        public void CountDownTimer(Object? source, ElapsedEventArgs e)
         {
             if(ElapsedTime > 0)
             {
@@ -85,11 +98,36 @@ namespace KweezR.Client.Pages
             }
             else
             {
+                if (Delay)
+                {
+                    ElapsedTime = 10;
+                    Delay = false;
+                    AssignNextQuestion();
+                }
+                else
+                {
+                    ElapsedTime = 5;
+                    Delay = true;
+                }
                 timer.Enabled = false;
-                ElapsedTime = 10;
                 timer.Dispose();
             }
             InvokeAsync(StateHasChanged);
+        }
+
+        public void AssignNextQuestion()
+        {
+            var rawQuest = AllQuestions!.Results[QuestionRound - 1];
+
+            rawQuest.Incorrect_Answers!.Add(rawQuest.Correct_Answer!);
+
+            var AllOptions = rawQuest.Incorrect_Answers.OrderBy(x => Guid.NewGuid()).ToList();
+
+            CurrentQuestion = rawQuest.Question!;
+            CurrentOptions = AllOptions;
+            QuestionRound++;
+
+            StartTimer();
         }
 
         private string GetPlayerBoxStyle(int index)
@@ -107,7 +145,9 @@ namespace KweezR.Client.Pages
 
         private void SelectAnswer(string option)
         {
-            // Implement answer selection logic
+
+            CurrentQuestion = "";
+            CurrentOptions = Enumerable.Empty<string>().ToList();
         }
 
         public async ValueTask DisposeAsync()

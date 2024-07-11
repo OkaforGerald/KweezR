@@ -8,6 +8,6 @@ namespace KweezR.Hubs
 
         Task SendLobbyDetails(LobbyDto lobby);
 
-        Task StartGame();
+        Task StartGame(QuestionDto questionDto);
     }
 }

@@ -51,9 +51,19 @@ else if(GameState == GameState.Lobby)
     </div>
 }else if (GameState == GameState.InProgress)
 {
-    <div class="timer">
-        Time remaining: @ElapsedTime seconds
-    </div>
+    @if (!Delay)
+    {
+        <div class="timer">
+            Time remaining: @ElapsedTime seconds
+        </div>
+    }
+    else
+    {
+        <div class="timer">
+            Next Round begins in: @ElapsedTime seconds
+        </div>
+    }
+
     <div class="player-container">
         @for (int i = 0; i < Lobby.Players.Count; i++)
         {
@@ -63,17 +73,24 @@ else if(GameState == GameState.Lobby)
             </div>
         }
     </div>
-    <div class="question-area">
-        <h2>@CurrentQuestion</h2>
-        <div class="options">
-            @foreach (var option in CurrentOptions)
-            {
-                <div class="option" @onclick="() => SelectAnswer(option)">
-                    @option
-                </div>
-            }
+    @if (!Delay)
+    {
+        <div class="question-area">
+            <h2>@((MarkupString)CurrentQuestion)</h2>
+            <div class="options">
+                @foreach (var option in CurrentOptions)
+                {
+                    <div class="option" @onclick="() => SelectAnswer(option)">
+                        @((MarkupString)option)
+                    </div>
+                }
+            </div>
         </div>
-    </div>
+    }
+    else
+    {
+        @* Show brief info from last round *@
+    }
 }
 <div class="chat-container">
         <div class="chat-history">

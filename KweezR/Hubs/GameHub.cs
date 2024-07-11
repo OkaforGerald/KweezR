@@ -1,8 +1,11 @@
 ﻿using System.Runtime.CompilerServices;
+using System.Text.Json;
+using Entities.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.AspNetCore.WebUtilities;
 using Services.Contract;
 using SharedAPI.TransferObjects;
 
@@ -42,7 +45,7 @@ namespace KweezR.Hubs
 
             if(lobbyDeets.Players!.Count() == roomName.MaxCapacity)
             {
-                await StartGame(roomName.Name!);
+                await StartGame(roomName.Id!);
             }
         }
 
@@ -88,14 +91,26 @@ namespace KweezR.Hubs
         private async Task StartGame(Guid roomId)
         {
             var roomName = await manager.Rooms.GetRoomByIdAsync(roomId);
-            await GetQuestions(roomName);
-            await Clients.Group(roomName.Name).StartGame();
+            var questions = await GetQuestions(roomName);
+            await Clients.Group(roomName.Name!).StartGame(questions);
         }
 
-        private async Task GetQuestions(RoomsDto room)
+        private async Task<QuestionDto> GetQuestions(RoomsDto room)
         {
-            //"https://opentdb.com/api.php?amount=10&category=12&difficulty=easy&type=multiple"
-            //room.NumberOfQuestions
+            var queryParameters = new Dictionary<string, string>()
+            {
+                ["amount"] = room.NumberOfQuestions.ToString(),
+                ["category"] = ((int)(object)Enum.Parse(typeof(QuizCategory), room.Category!)) + "",
+                ["difficulty"] = "easy",
+                ["type"] = "multiple"
+            };
+
+            var response = await client.GetAsync(QueryHelpers.AddQueryString("", queryParameters));
+            var json = await response.Content.ReadAsStringAsync();
+
+            var questions = JsonSerializer.Deserialize<QuestionDto>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive =  true });
+
+            return questions!;
         }
 
         private Guid RemoveFromDictionary(string Id)
