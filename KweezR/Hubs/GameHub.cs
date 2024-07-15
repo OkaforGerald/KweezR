@@ -41,6 +41,7 @@ namespace KweezR.Hubs
             var lobbyDeets = GetLobbyInfo(roomName);
 
             await Clients.Group(roomName.Name!).SendMessage($"<SERVER>: WELCOME {Context?.User?.Identity?.Name}!");
+            await Clients.Caller.SendPlayerName(Context?.User?.Identity?.Name!);
             await Clients.Group(roomName.Name!).SendLobbyDetails(lobbyDeets);
 
             if(lobbyDeets.Players!.Count() == roomName.MaxCapacity)
@@ -54,6 +55,13 @@ namespace KweezR.Hubs
             var room = await manager.Rooms.GetRoomByIdAsync(RoomId);
 
             await Clients.Group(room!.Name!).SendMessage($"<{Context.User?.Identity!.Name}>: {message}");
+        }
+
+        public async Task UpdateScore(Guid RoomId, string Player, int score)
+        {
+            var room = await manager.Rooms.GetRoomByIdAsync(RoomId);
+
+            await Clients.GroupExcept(room.Name!, Context.ConnectionId).SendScores(new Tuple<string, int>(Player, score));
         }
 
         public async override Task OnDisconnectedAsync(Exception? exception)

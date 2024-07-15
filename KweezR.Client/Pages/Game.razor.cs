@@ -13,6 +13,7 @@ namespace KweezR.Client.Pages
 	{
 		[Parameter]
 		public string Id { get; set; }
+        public string Username { get; set; }
 		private LobbyDto? Lobby { get; set; }
 		private string? message { get; set; }
 		private HubConnectionState State { get; set; }
@@ -23,8 +24,8 @@ namespace KweezR.Client.Pages
         private bool Delay { get; set; }
 		private int ElapsedTime { get; set; } = 5;
         Timer timer;
-        private string CurrentQuestion { get; set; } = "What color's your tip?";
-        private List<string> CurrentOptions { get; set; } = new List<string> { "Red", "Brown", "White", "Jigsaw you tweaking"};
+        private string CurrentQuestion { get; set; }
+        private List<string> CurrentOptions { get; set; } = new List<string> ();
         private QuestionDto? AllQuestions { get; set; }
         private Dictionary<string, int> PlayerScores { get; set; } = new Dictionary<string, int>();
 
@@ -37,6 +38,11 @@ namespace KweezR.Client.Pages
 				Messages!.Add(message);
 				StateHasChanged();
 			});
+
+            hubConnection.On<string>("SendPlayerName", (username) =>
+            {
+                Username = username;
+            });
 
 			hubConnection.On<LobbyDto>("SendLobbyDetails", (lobby) =>
 			{
@@ -56,6 +62,12 @@ namespace KweezR.Client.Pages
                 Delay = true;
                 StartTimer();
 			});
+
+            hubConnection.On<Tuple<string, int>>("SendScores", (PlayerAndScore) =>
+            {
+                PlayerScores[PlayerAndScore.Item1] = PlayerAndScore.Item2;
+                StateHasChanged();
+            });
 
 			await hubConnection.StartAsync();
 		}
@@ -143,10 +155,17 @@ namespace KweezR.Client.Pages
             return "flex-basis: 45%;"; // For 4 players
         }
 
-        private void SelectAnswer(string option)
+        private async Task SelectAnswer(string option)
         {
+            var currentQuestion = AllQuestions!.Results[QuestionRound - 2];
+            if(option.Equals(currentQuestion.Correct_Answer, StringComparison.CurrentCultureIgnoreCase))
+            {
+                PlayerScores[Username] += 10;
+                StateHasChanged();
 
-            CurrentQuestion = "";
+                await hubConnection!.SendAsync("UpdateScore", Id, Username, PlayerScores[Username]);
+            }
+
             CurrentOptions = Enumerable.Empty<string>().ToList();
         }
 

@@ -80,7 +80,7 @@ else if(GameState == GameState.Lobby)
             <div class="options">
                 @foreach (var option in CurrentOptions)
                 {
-                    <div class="option" @onclick="() => SelectAnswer(option)">
+                    <div class="option" @onclick="async () => await SelectAnswer(option)">
                         @((MarkupString)option)
                     </div>
                 }

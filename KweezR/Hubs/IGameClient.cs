@@ -9,5 +9,9 @@ namespace KweezR.Hubs
         Task SendLobbyDetails(LobbyDto lobby);
 
         Task StartGame(QuestionDto questionDto);
+
+        Task SendPlayerName(string username);
+
+        Task SendScores(Tuple<string, int> playerScores);
     }
 }
